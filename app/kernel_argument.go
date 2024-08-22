@@ -3,6 +3,7 @@ package app
 import (
 	"bytes"
 	"fmt"
+	"strconv"
 	"strings"
 	"text/template"
 )
@@ -14,8 +15,8 @@ type KernelArgument struct {
 }
 
 func conditionalQuote(key, value string) string {
-	if strings.ContainsAny(value, " \t") {
-		return fmt.Sprintf(`%s="%s"`, key, value)
+	if strings.ContainsAny(value, " \t=") {
+		return fmt.Sprintf(`%s=%s`, key, strconv.Quote(value))
 	}
 	return fmt.Sprintf(`%s=%s`, key, value)
 }
