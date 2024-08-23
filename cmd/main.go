@@ -16,6 +16,7 @@ import (
 	"code.crute.us/mcrute/netboot-server/app"
 	"code.crute.us/mcrute/netboot-server/netboxconfig"
 	"code.crute.us/mcrute/netboot-server/util"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -144,6 +145,7 @@ func (a *App) Main(c *cobra.Command, args []string) {
 	//
 	// Add HTTP Routes
 	//
+	mux.Handle("GET /metrics", promhttp.Handler())
 	mux.Handle("GET /boot.ipxe", &app.IpxeRedirectHandler{HttpServer: appCfg.HttpServer})
 	mux.Handle("GET /{mac}/boot.ipxe", ipxeRendererHandler)
 	mux.Handle("GET /{mac}/apkovl.tar.gz", apkOvlHandler)

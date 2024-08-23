@@ -7,7 +7,20 @@ import (
 	"sync"
 	"text/template"
 
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"go.uber.org/zap"
+)
+
+var (
+	ipxeRenderSuccessMetric = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "netboot_ipxe_render_success",
+		Help: "Successful MAC-specific IPXE configuration renderings",
+	})
+	ipxeRenderFailureMetric = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "netboot_ipxe_render_failure",
+		Help: "Failed MAC-specific IPXE configuration renderings",
+	})
 )
 
 type IpxeDistroList []*Distribution
@@ -91,10 +104,13 @@ func (h *IpxeRendererHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		"ARM64Distros": h.arm64Distros,
 	}); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		ipxeRenderFailureMetric.Inc()
 		h.Logger.Error("Error rendering IPXE template",
 			zap.String("mac", r.PathValue("mac")),
 			zap.Error(err),
 		)
 		return
 	}
+
+	ipxeRenderSuccessMetric.Inc()
 }

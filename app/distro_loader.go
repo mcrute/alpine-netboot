@@ -13,7 +13,36 @@ import (
 	"time"
 
 	mapset "github.com/deckarep/golang-set/v2"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"go.uber.org/zap"
+)
+
+var (
+	scanHupMetric = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "netboot_scan_hup_count",
+		Help: "Number of rescan events triggered by SIGHUP",
+	})
+	scanTimerMetric = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "netboot_scan_timer_count",
+		Help: "Number of rescan events triggered by the timer",
+	})
+	scanCountMetric = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "netboot_scan_count",
+		Help: "Number of rescan events",
+	})
+	scanSoftFailureMetric = promauto.NewCounterVec(prometheus.CounterOpts{
+		Name: "netboot_scan_soft_failure",
+		Help: "Number of failures during scan that did not abort the scan",
+	}, []string{"reason"})
+	scanHardFailureMetric = promauto.NewCounterVec(prometheus.CounterOpts{
+		Name: "netboot_scan_hard_failure",
+		Help: "Number of failures during scan that aborted the scan",
+	}, []string{"reason"})
+	scanFoundDistroSuccessMetric = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "netboot_scan_distro_success",
+		Help: "Number of successfully found distributions in last scan",
+	})
 )
 
 type DistributionCatalog struct {
@@ -67,6 +96,7 @@ func (c *DistributionCatalog) scanVersions(root string, versionCandidates []fs.D
 		versionPath := filepath.Join(root, versionName)
 		archCandidates, err := fs.ReadDir(c.files, versionPath)
 		if err != nil {
+			scanSoftFailureMetric.WithLabelValues("reason", "arch_candidate_read_failed").Inc()
 			c.logger.Debug("Error reading architecture candidates",
 				zap.String("path", versionPath),
 				zap.Error(err),
@@ -85,6 +115,7 @@ func (c *DistributionCatalog) scanVersions(root string, versionCandidates []fs.D
 			archPath := filepath.Join(versionPath, archName)
 			entries, err := fs.ReadDir(c.files, archPath)
 			if err != nil {
+				scanSoftFailureMetric.WithLabelValues("reason", "list_files_read_failed").Inc()
 				c.logger.Debug("Error reading architecture files",
 					zap.String("path", archPath),
 					zap.Error(err),
@@ -126,6 +157,7 @@ func (c *DistributionCatalog) scanFiles() error {
 	root, err := fs.ReadDir(c.files, ".")
 	if err != nil {
 		c.logger.Error("Error reading root distro candidates", zap.Error(err))
+		scanHardFailureMetric.WithLabelValues("reason", "root_read_failed").Inc()
 		c.watchErrors <- err
 		return err
 	}
@@ -139,6 +171,7 @@ func (c *DistributionCatalog) scanFiles() error {
 		// Fetch version candidates
 		versionCandidateFiles, err := fs.ReadDir(c.files, distroCandidate.Name())
 		if err != nil {
+			scanSoftFailureMetric.WithLabelValues("reason", "distro_candidate_read_failed").Inc()
 			c.logger.Debug("Error reading distro candidate files",
 				zap.String("distro", distroCandidate.Name()),
 				zap.Error(err),
@@ -160,6 +193,7 @@ func (c *DistributionCatalog) scanFiles() error {
 				// considered for any further processing.
 				distro, err = DistributionFromYaml(c.files, filepath.Join(distroCandidate.Name(), item.Name()))
 				if err != nil {
+					scanSoftFailureMetric.WithLabelValues("reason", "distro_yaml_read_failed").Inc()
 					c.logger.Debug("Error loading distro.yaml",
 						zap.String("distro", distroCandidate.Name()),
 						zap.Error(err),
@@ -176,6 +210,7 @@ func (c *DistributionCatalog) scanFiles() error {
 		if distro != nil {
 			scanned, err := c.scanVersions(distroCandidate.Name(), versionCandidates, *distro)
 			if err != nil {
+				scanHardFailureMetric.WithLabelValues("reason", "version_scan_failed").Inc()
 				c.watchErrors <- err
 				return err
 			}
@@ -203,6 +238,10 @@ func (c *DistributionCatalog) scanFiles() error {
 	c.Lock()
 	c.distros = distros
 	c.Unlock()
+
+	// Log some metrics
+	scanCountMetric.Inc()
+	scanFoundDistroSuccessMetric.Set(float64(len(c.distros)))
 
 	// ... and notify all of our watchers
 	for _, watcher := range c.watchers {
@@ -236,9 +275,11 @@ func (c *DistributionCatalog) ManageAsync(ctx context.Context, wg *sync.WaitGrou
 				return
 			case <-hupChan:
 				c.logger.Info("Got SIGHUP, re-scanning distributions")
+				scanHupMetric.Inc()
 				c.scanFiles()
 			case <-t.C:
 				c.logger.Debug("Performing periodic scan of distributions")
+				scanTimerMetric.Inc()
 				c.scanFiles()
 			}
 		}
