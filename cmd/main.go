@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"sync"
 	"syscall"
 
@@ -106,7 +107,7 @@ func (a *App) Main(c *cobra.Command, args []string) {
 	//
 	// Setup IPXE Render Handler
 	//
-	varsCfg, err := app.LoadVarsConfigYaml(appCfg.VarsConfigFile)
+	varsCfg, err := app.LoadVarsConfigYaml(filepath.Join(appCfg.DistroFilesPath, appCfg.VarsConfigFile))
 	if err != nil {
 		logger.Fatal("Error loading variables configuration", zap.Error(err))
 	}

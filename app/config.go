@@ -28,7 +28,7 @@ type Config struct {
 	DistroFilesPath       string `flag:"distro-files" flag-help:"Path to distribution file tree"`
 	NtpServer             string `flag:"ntp-server" flag-help:"Address of NTP server"`
 	HttpServer            string `flag:"http-server" flag-help:"HTTP/S URL to this server"`
-	VarsConfigFile        string `flag:"vars-config" flag-help:"Path to variables config file"`
+	VarsConfigFile        string `flag:"vars-config" flag-help:"Path to variables config file, within distro-files"`
 	VaultNetboxPath       string `flag:"vault-netbox-path" flag-help:"Path in Vault KV store for Netbox credential"`
 	NetboxDefaultConfigId int    `flag:"default-config-id" flag-help:"ID for default config context"`
 }
@@ -38,10 +38,10 @@ var DefaultConfig = &Config{
 	BindHttp:              ":80",
 	BindTftp:              ":69",
 	NetboxHost:            defaultNetboxHost,
-	DistroFilesPath:       "./html",
+	DistroFilesPath:       "/netboot",
 	NtpServer:             "0.pool.ntp.org",
 	HttpServer:            defaultHttpServer,
-	VarsConfigFile:        "./html/vars.yaml",
+	VarsConfigFile:        "vars.yaml",
 	VaultNetboxPath:       defaultVaultNetboxPath,
 	NetboxDefaultConfigId: mustAtoi(defaultNetboxConfigId),
 }
