@@ -96,7 +96,7 @@ func (c *DistributionCatalog) scanVersions(root string, versionCandidates []fs.D
 		versionPath := filepath.Join(root, versionName)
 		archCandidates, err := fs.ReadDir(c.files, versionPath)
 		if err != nil {
-			scanSoftFailureMetric.WithLabelValues("reason", "arch_candidate_read_failed").Inc()
+			scanSoftFailureMetric.WithLabelValues("arch_candidate_read_failed").Inc()
 			c.logger.Debug("Error reading architecture candidates",
 				zap.String("path", versionPath),
 				zap.Error(err),
@@ -115,7 +115,7 @@ func (c *DistributionCatalog) scanVersions(root string, versionCandidates []fs.D
 			archPath := filepath.Join(versionPath, archName)
 			entries, err := fs.ReadDir(c.files, archPath)
 			if err != nil {
-				scanSoftFailureMetric.WithLabelValues("reason", "list_files_read_failed").Inc()
+				scanSoftFailureMetric.WithLabelValues("list_files_read_failed").Inc()
 				c.logger.Debug("Error reading architecture files",
 					zap.String("path", archPath),
 					zap.Error(err),
@@ -157,7 +157,7 @@ func (c *DistributionCatalog) scanFiles() error {
 	root, err := fs.ReadDir(c.files, ".")
 	if err != nil {
 		c.logger.Error("Error reading root distro candidates", zap.Error(err))
-		scanHardFailureMetric.WithLabelValues("reason", "root_read_failed").Inc()
+		scanHardFailureMetric.WithLabelValues("root_read_failed").Inc()
 		c.watchErrors <- err
 		return err
 	}
@@ -171,7 +171,7 @@ func (c *DistributionCatalog) scanFiles() error {
 		// Fetch version candidates
 		versionCandidateFiles, err := fs.ReadDir(c.files, distroCandidate.Name())
 		if err != nil {
-			scanSoftFailureMetric.WithLabelValues("reason", "distro_candidate_read_failed").Inc()
+			scanSoftFailureMetric.WithLabelValues("distro_candidate_read_failed").Inc()
 			c.logger.Debug("Error reading distro candidate files",
 				zap.String("distro", distroCandidate.Name()),
 				zap.Error(err),
@@ -193,7 +193,7 @@ func (c *DistributionCatalog) scanFiles() error {
 				// considered for any further processing.
 				distro, err = DistributionFromYaml(c.files, filepath.Join(distroCandidate.Name(), item.Name()))
 				if err != nil {
-					scanSoftFailureMetric.WithLabelValues("reason", "distro_yaml_read_failed").Inc()
+					scanSoftFailureMetric.WithLabelValues("distro_yaml_read_failed").Inc()
 					c.logger.Debug("Error loading distro.yaml",
 						zap.String("distro", distroCandidate.Name()),
 						zap.Error(err),
@@ -210,7 +210,7 @@ func (c *DistributionCatalog) scanFiles() error {
 		if distro != nil {
 			scanned, err := c.scanVersions(distroCandidate.Name(), versionCandidates, *distro)
 			if err != nil {
-				scanHardFailureMetric.WithLabelValues("reason", "version_scan_failed").Inc()
+				scanHardFailureMetric.WithLabelValues("version_scan_failed").Inc()
 				c.watchErrors <- err
 				return err
 			}

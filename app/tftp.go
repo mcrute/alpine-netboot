@@ -26,17 +26,17 @@ type TftpHandler struct {
 func (h *TftpHandler) HandleRead(filename string, rf io.ReaderFrom) (int64, error) {
 	file, err := h.Root.Open(filename)
 	if err != nil {
-		tftpServeFailuresMetric.WithLabelValues("filename", filename).Inc()
+		tftpServeFailuresMetric.WithLabelValues(filename).Inc()
 		return 0, err
 	}
 	defer file.Close()
 
 	n, err := rf.ReadFrom(file)
 	if err != nil {
-		tftpServeFailuresMetric.WithLabelValues("filename", filename).Inc()
+		tftpServeFailuresMetric.WithLabelValues(filename).Inc()
 		return 0, err
 	}
 
-	tftpServeSuccessMetric.WithLabelValues("filename", filename).Inc()
+	tftpServeSuccessMetric.WithLabelValues(filename).Inc()
 	return n, nil
 }
