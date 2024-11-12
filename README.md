@@ -443,3 +443,38 @@ dhcp-boot=tag:bootstrap-x86-bios,"undionly.kpxe"
 dhcp-boot=tag:bootstrap-x86_64-efi,"ipxe.efi"
 dhcp-boot=tag:bootstrap-x86-efi,"ipxe.efi"
 ```
+
+### Monitoring
+
+The application exposes Prometheus metrics on the `/metrics` endpoint of
+the HTTP server. The following metrics are exposed:
+
+ * `netboot_ipxe_render_success` - Successful MAC-specific IPXE
+   configuration renderings
+ * `netboot_ipxe_render_failure` - Failed MAC-specific IPXE
+   configuration renderings
+ * `netboot_tftp_read_success` - Successful TFTP read responses, has a
+   `filename` label for tracking requested files
+ * `netboot_tftp_read_failure` - Failed TFTP read responses, has a
+   `filename` label for tracking requested files
+ * `netboot_scan_hup_count` - Number of rescan events triggered by
+   SIGHUP
+ * `netboot_scan_timer_count` - Number of rescan events triggered by the
+   timer
+ * `netboot_scan_count` - Number of rescan events
+ * `netboot_scan_soft_failure` - Number of failures during scan that did
+   not abort the scan, contains `reason` label indicating the cause of the
+   failure
+ * `netboot_scan_hard_failure` - Number of failures during scan that
+   aborted the sca, contains `reason` label indicating the cause of the
+   failure
+ * `netboot_scan_distro_success` - Number of successfully found
+    distributions in last scan
+ * `netboot_apkovl_lookup_failures` - Failures when looking up a MAC
+   address
+ * `netboot_apkovl_default_gen_error` - Failures when generating a
+   default apkovl
+ * `netboot_apkovl_gen_error` - Failures when generating a MAC-specific
+   apkovl
+ * `netboot_apkovl_serve_default` - Default apkovl files served
+ * `netboot_apkovl_success` - Successfully generated apkovl files
