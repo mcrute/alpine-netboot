@@ -47,6 +47,8 @@ cloud.google.com/go/storage v1.8.0/go.mod h1:Wv1Oy7z6Yz3DshWRJFhqM/UCfaWIRTdp0RX
 cloud.google.com/go/storage v1.10.0/go.mod h1:FLPqc6j+Ki4BU591ie1oL6qBQGu2Bl/tZ9ullr3+Kg0=
 code.crute.us/mcrute/golib v0.4.0 h1:VWxb7v4gGkqL700zxDwgROweBsfx5RbiB35VW0O0oi0=
 code.crute.us/mcrute/golib v0.4.0/go.mod h1:dukLPhs1H8dxtkhXtpJZYo/bMzefLRbdRj9Tj67wdaQ=
+code.crute.us/mcrute/golib/cli v0.3.1 h1:2whEahYbonTT8OV+NikwY9MyKcDOpwKiJFPSx2XxUj0=
+code.crute.us/mcrute/golib/cli v0.3.1/go.mod h1:mHHFk4JEaky9f+BjSgyFa8aWmqaAKBxQncmhHDNrVX0=
 code.crute.us/mcrute/golib/clients/netbox/v4 v4.1.0 h1:bkUWDU9w3uJZzYU9B+uj8xcZXdck1E5ayw81Gy8uzRg=
 code.crute.us/mcrute/golib/clients/netbox/v4 v4.1.0/go.mod h1:ychzZiBotzfch2J6UboVDshDCOqOLxkMKx9CtS8PHKw=
 code.crute.us/mcrute/golib/secrets v0.5.1 h1:4OQ1Jrmy4X4ZGPam2HQDsJFINXs9/IquZBLt1qGcNPI=

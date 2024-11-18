@@ -16,7 +16,6 @@ $(BINARY): $(shell find . -name '*.go')
 		"  \
 		-o $@
 
-
 .PHONY: docker
 docker: $(BINARY)
 	mkdir docker; cp Dockerfile $(BINARY) docker; cd docker; \

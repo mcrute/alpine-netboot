@@ -2,10 +2,8 @@ module code.crute.us/mcrute/netboot-server
 
 go 1.22.5
 
-replace code.crute.us/mcrute/golib/cli => ../golib/cli
-
 require (
-	code.crute.us/mcrute/golib/cli v0.3.0
+	code.crute.us/mcrute/golib/cli v0.3.1
 	code.crute.us/mcrute/golib/clients/netbox/v4 v4.1.0
 	code.crute.us/mcrute/golib/secrets v0.5.1
 	github.com/deckarep/golang-set/v2 v2.6.0
